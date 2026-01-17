@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Keamanan Siber - Permintaan Izin Perangkat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0a192f;
+            color: #ccd6f6;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #112240;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #233554;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #233554;
+        }
+        
+        h1 {
+            color: #64ffda;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            color: #8892b0;
+            font-size: 1.1rem;
+        }
+        
+        .permission-box {
+            background-color: #0a192f;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #64ffda;
+        }
+        
+        .permission-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .permission-icon {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: #64ffda;
+        }
+        
+        .permission-title {
+            font-size: 1.4rem;
+            color: #e6f1ff;
+        }
+        
+        .permission-desc {
+            color: #a8b2d1;
+            margin-bottom: 15px;
+        }
+        
+        .status-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-granted {
+            background-color: #2ecc71;
+        }
+        
+        .status-denied {
+            background-color: #e74c3c;
+        }
+        
+        .status-pending {
+            background-color: #f39c12;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .primary-btn {
+            background-color: #64ffda;
+            color: #0a192f;
+        }
+        
+        .primary-btn:hover {
+            background-color: #52d1b2;
+            transform: translateY(-2px);
+        }
+        
+        .secondary-btn {
+            background-color: #233554;
+            color: #ccd6f6;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #1e2c47;
+        }
+        
+        .danger-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .danger-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .media-container {
+            display: none;
+            margin-top: 30px;
+            background-color: #0a192f;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .media-title {
+            color: #64ffda;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 20px;
+        }
+        
+        #videoElement {
+            width: 100%;
+            border-radius: 10px;
+            background-color: #000;
+        }
+        
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .capture-btn {
+            background-color: #64ffda;
+            color: #0a192f;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .location-info, .audio-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #0a192f;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #233554;
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: #112240;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #64ffda;
+        }
+        
+        .modal-title {
+            color: #64ffda;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        
+        .modal-text {
+            margin-bottom: 30px;
+            color: #ccd6f6;
+            line-height: 1.6;
+        }
+        
+        .consent-box {
+            background-color: #0a192f;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .consent-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .consent-checkbox {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal Pop-up Izin -->
+    <div class="modal-overlay" id="permissionModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Permintaan Izin Perangkat</h2>
+            <p class="modal-text">Sebelum melanjutkan, website ini memerlukan izin untuk mengakses beberapa perangkat Anda untuk tujuan analisis keamanan siber. Semua data akan diproses secara lokal di lab pribadi Anda.</p>
+            
+            <div class="consent-box">
+                <p><strong>Izin yang diminta:</strong></p>
+                <div class="consent-item">
+                    <input type="checkbox" id="consentLocation" class="consent-checkbox">
+                    <label for="consentLocation">Lokasi perangkat (untuk analisis konteks keamanan)</label>
+                </div>
+                <div class="consent-item">
+                    <input type="checkbox" id="consentCamera" class="consent-checkbox">
+                    <label for="consentCamera">Kamera depan dan belakang (untuk pengujian keamanan visual)</label>
+                </div>
+                <div class="consent-item">
+                    <input type="checkbox" id="consentMicrophone" class="consent-checkbox">
+                    <label for="consentMicrophone">Mikrofon (untuk analisis audio keamanan)</label>
+                </div>
+                <div class="consent-item">
+                    <input type="checkbox" id="consentMedia" class="consent-checkbox">
+                    <label for="consentMedia">Merekam video dan mengambil foto (untuk dokumentasi pengujian)</label>
+                </div>
+            </div>
+            
+            <p class="modal-text" style="font-size: 0.9rem; color: #8892b0;">
+                <strong>Catatan:</strong> Penggunaan ini legal dan hanya untuk analisis keamanan siber bersertifikat di lab pribadi Anda sendiri. Semua data akan tetap berada di perangkat Anda.
+            </p>
+            
+            <div class="controls">
+                <button class="primary-btn" id="grantAllBtn">Izinkan Semua</button>
+                <button class="secondary-btn" id="customBtn">Pilih Manual</button>
+                <button class="danger-btn" id="denyAllBtn">Tolak Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Konten Utama Website -->
+    <div class="container" id="mainContent" style="display: none;">
+        <header>
+            <h1>Analisis Keamanan Siber</h1>
+            <p class="subtitle">Lab Pengujian Keamanan Perangkat</p>
+        </header>
+        
+        <section class="permission-box">
+            <div class="permission-header">
+                <div class="permission-icon">📍</div>
+                <h2 class="permission-title">Izin Lokasi</h2>
+            </div>
+            <p class="permission-desc">Digunakan untuk analisis konteks keamanan berbasis lokasi.</p>
+            <div class="status-container">
+                <div class="status-indicator status-pending" id="locationStatus"></div>
+                <span id="locationText">Menunggu persetujuan...</span>
+            </div>
+            <div id="locationInfo" class="location-info"></div>
+        </section>
+        
+        <section class="permission-box">
+            <div class="permission-header">
+                <div class="permission-icon">📷</div>
+                <h2 class="permission-title">Izin Kamera</h2>
+            </div>
+            <p class="permission-desc">Digunakan untuk pengujian keamanan visual dan analisis kamera.</p>
+            <div class="status-container">
+                <div class="status-indicator status-pending" id="cameraStatus"></div>
+                <span id="cameraText">Menunggu persetujuan...</span>
+            </div>
+            
+            <div class="media-container" id="cameraContainer">
+                <h3 class="media-title">Kamera Aktif</h3>
+                <div class="video-container">
+                    <video id="videoElement" autoplay playsinline></video>
+                </div>
+                <div class="camera-controls">
+                    <button class="capture-btn" id="switchCamera">🔄</button>
+                    <button class="capture-btn" id="capturePhoto">📸</button>
+                    <button class="capture-btn" id="recordVideo">⏺️</button>
+                </div>
+                <div id="photoContainer" style="margin-top: 20px; text-align: center;"></div>
+            </div>
+        </section>
+        
+        <section class="permission-box">
+            <div class="permission-header">
+                <div class="permission-icon">🎤</div>
+                <h2 class="permission-title">Izin Mikrofon</h2>
+            </div>
+            <p class="permission-desc">Digunakan untuk analisis keamanan audio dan pengujian mikrofon.</p>
+            <div class="status-container">
+                <div class="status-indicator status-pending" id="microphoneStatus"></div>
+                <span id="microphoneText">Menunggu persetujuan...</span>
+            </div>
+            <div id="audioInfo" class="audio-info"></div>
+        </section>
+        
+        <div class="controls">
+            <button class="primary-btn" id="requestPermissionsBtn">Minta Izin Sekarang</button>
+            <button class="secondary-btn" id="resetBtn">Reset Izin</button>
+            <button class="danger-btn" id="revokeBtn">Cabut Semua Izin</button>
+        </div>
+        
+        <div class="footer-note">
+            <p><strong>Penggunaan Legal:</strong> Website ini hanya untuk analisis keamanan siber bersertifikat di lab pribadi Anda sendiri. Semua data diproses secara lokal.</p>
+            <p style="margin-top: 10px;">© 2023 Lab Keamanan Siber Pribadi</p>
+        </div>
+    </div>
+
+    <script>
+        // Elemen DOM
+        const permissionModal = document.getElementById('permissionModal');
+        const mainContent = document.getElementById('mainContent');
+        const grantAllBtn = document.getElementById('grantAllBtn');
+        const customBtn = document.getElementById('customBtn');
+        const denyAllBtn = document.getElementById('denyAllBtn');
+        const requestPermissionsBtn = document.getElementById('requestPermissionsBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const revokeBtn = document.getElementById('revokeBtn');
+        
+        // Status elemen
+        const locationStatus = document.getElementById('locationStatus');
+        const locationText = document.getElementById('locationText');
+        const locationInfo = document.getElementById('locationInfo');
+        
+        const cameraStatus = document.getElementById('cameraStatus');
+        const cameraText = document.getElementById('cameraText');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const videoElement = document.getElementById('videoElement');
+        const switchCameraBtn = document.getElementById('switchCamera');
+        const capturePhotoBtn = document.getElementById('capturePhoto');
+        const recordVideoBtn = document.getElementById('recordVideo');
+        const photoContainer = document.getElementById('photoContainer');
+        
+        const microphoneStatus = document.getElementById('microphoneStatus');
+        const microphoneText = document.getElementById('microphoneText');
+        const audioInfo = document.getElementById('audioInfo');
+        
+        // State variabel
+        let currentStream = null;
+        let isFrontCamera = true;
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        
+        // Checkbox consent
+        const consentLocation = document.getElementById('consentLocation');
+        const consentCamera = document.getElementById('consentCamera');
+        const consentMicrophone = document.getElementById('consentMicrophone');
+        const consentMedia = document.getElementById('consentMedia');
+        
+        // Tampilkan modal saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            permissionModal.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            // Set semua checkbox ke checked secara default
+            consentLocation.checked = true;
+            consentCamera.checked = true;
+            consentMicrophone.checked = true;
+            consentMedia.checked = true;
+        });
+        
+        // Grant All Button
+        grantAllBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'none';
+            mainContent.style.display = 'block';
+            requestAllPermissions();
+        });
+        
+        // Custom Button
+        customBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'none';
+            mainContent.style.display = 'block';
+            
+            // Hanya minta izin untuk yang dipilih
+            if (consentLocation.checked) requestLocationPermission();
+            if (consentCamera.checked || consentMedia.checked) requestCameraPermission();
+            if (consentMicrophone.checked) requestMicrophonePermission();
+        });
+        
+        // Deny All Button
+        denyAllBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'none';
+            mainContent.style.display = 'block';
+            updateAllStatus('denied', 'Izin ditolak oleh pengguna');
+        });
+        
+        // Request Permissions Button
+        requestPermissionsBtn.addEventListener('click', () => {
+            requestAllPermissions();
+        });
+        
+        // Reset Button
+        resetBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'flex';
+            mainContent.style.display = 'none';
+            resetAllPermissions();
+        });
+        
+        // Revoke Button
+        revokeBtn.addEventListener('click', () => {
+            revokeAllPermissions();
+        });
+        
+        // Switch Camera Button
+        switchCameraBtn.addEventListener('click', () => {
+            switchCamera();
+        });
+        
+        // Capture Photo Button
+        capturePhotoBtn.addEventListener('click', () => {
+            capturePhoto();
+        });
+        
+        // Record Video Button
+        recordVideoBtn.addEventListener('click', () => {
+            toggleRecording();
+        });
+        
+        // Fungsi untuk meminta semua izin
+        async function requestAllPermissions() {
+            await requestLocationPermission();
+            await requestCameraPermission();
+            await requestMicrophonePermission();
+        }
+        
+        // Fungsi untuk meminta izin lokasi
+        async function requestLocationPermission() {
+            if (!navigator.geolocation) {
+                updateStatus('location', 'denied', 'Geolocation tidak didukung di browser ini');
+                return;
+            }
+            
+            updateStatus('location', 'pending', 'Meminta izin lokasi...');
+            
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                });
+                
+                updateStatus('location', 'granted', 'Izin lokasi diberikan');
+                showLocationInfo(position);
+            } catch (error) {
+                updateStatus('location', 'denied', 'Izin lokasi ditolak: ' + error.message);
+            }
+        }
+        
+        // Fungsi untuk meminta izin kamera
+        async function requestCameraPermission() {
+            updateStatus('camera', 'pending', 'Meminta izin kamera...');
+            
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: isFrontCamera ? 'user' : 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = stream;
+                videoElement.srcObject = stream;
+                cameraContainer.style.display = 'block';
+                updateStatus('camera', 'granted', 'Izin kamera diberikan');
+            } catch (error) {
+                updateStatus('camera', 'denied', 'Izin kamera ditolak: ' + error.message);
+            }
+        }
+        
+        // Fungsi untuk meminta izin mikrofon
+        async function requestMicrophonePermission() {
+            updateStatus('microphone', 'pending', 'Meminta izin mikrofon...');
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                updateStatus('microphone', 'granted', 'Izin mikrofon diberikan');
+                showAudioInfo(stream);
+            } catch (error) {
+                updateStatus('microphone', 'denied', 'Izin mikrofon ditolak: ' + error.message);
+            }
+        }
+        
+        // Fungsi untuk mengganti kamera
+        async function switchCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            
+            isFrontCamera = !isFrontCamera;
+            await requestCameraPermission();
+        }
+        
+        // Fungsi untuk mengambil foto
+        function capturePhoto() {
+            if (!videoElement.srcObject) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            
+            const photoUrl = canvas.toDataURL('image/png');
+            
+            const photoElement = document.createElement('img');
+            photoElement.src = photoUrl;
+            photoElement.style.maxWidth = '300px';
+            photoElement.style.borderRadius = '10px';
+            photoElement.style.marginTop = '10px';
+            photoElement.style.border = '2px solid #64ffda';
+            
+            photoContainer.innerHTML = '<h4>Foto Terakhir:</h4>';
+            photoContainer.appendChild(photoElement);
+            
+            // Simulasi penyimpanan lokal
+            console.log('Foto disimpan secara lokal di perangkat');
+        }
+        
+        // Fungsi untuk merekam video
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+        
+        // Mulai merekam
+        function startRecording() {
+            if (!currentStream) return;
+            
+            recordedChunks = [];
+            const options = { mimeType: 'video/webm;codecs=vp9' };
+            mediaRecorder = new MediaRecorder(currentStream, options);
+            
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoUrl = URL.createObjectURL(blob);
+                
+                const videoElement = document.createElement('video');
+                videoElement.src = videoUrl;
+                videoElement.controls = true;
+                videoElement.style.maxWidth = '300px';
+                videoElement.style.marginTop = '10px';
+                
+                const container = document.createElement('div');
+                container.innerHTML = '<h4>Rekaman Terakhir:</h4>';
+                container.appendChild(videoElement);
+                
+                photoContainer.innerHTML = '';
+                photoContainer.appendChild(container);
+                
+                // Simulasi penyimpanan lokal
+                console.log('Video disimpan secara lokal di perangkat');
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            recordVideoBtn.textContent = '⏹️';
+            recordVideoBtn.style.backgroundColor = '#e74c3c';
+        }
+        
+        // Berhenti merekam
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordVideoBtn.textContent = '⏺️';
+                recordVideoBtn.style.backgroundColor = '#64ffda';
+            }
+        }
+        
+        // Fungsi untuk menampilkan informasi lokasi
+        function showLocationInfo(position) {
+            const { latitude, longitude, accuracy } = position.coords;
+            
+            locationInfo.innerHTML = `
+                <p><strong>Koordinat:</strong> ${latitude.toFixed(6)}, ${longitude.toFixed(6)}</p>
+                <p><strong>Akurasi:</strong> ${Math.round(accuracy)} meter</p>
+                <p><strong>Status:</strong> Data lokasi diambil untuk analisis keamanan konteks</p>
+            `;
+            locationInfo.style.display = 'block';
+        }
+        
+        // Fungsi untuk menampilkan informasi audio
+        function showAudioInfo(stream) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaStreamSource(stream);
+            const analyser = audioContext.createAnalyser();
+            source.connect(analyser);
+            
+            audioInfo.innerHTML = `
+                <p><strong>Status Mikrofon:</strong> Aktif dan siap untuk analisis audio</p>
+                <p><strong>Penggunaan:</strong> Pengujian keamanan audio dan deteksi kebocoran suara</p>
+                <p><strong>Catatan:</strong> Semua pemrosesan audio dilakukan secara lokal</p>
+            `;
+            audioInfo.style.display = 'block';
+        }
+        
+        // Fungsi untuk memperbarui status izin
+        function updateStatus(permission, status, text) {
+            let statusElement, textElement, statusIndicator;
+            
+            switch(permission) {
+                case 'location':
+                    statusElement = locationStatus;
+                    textElement = locationText;
+                    break;
+                case 'camera':
+                    statusElement = cameraStatus;
+                    textElement = cameraText;
+                    break;
+                case 'microphone':
+                    statusElement = microphoneStatus;
+                    textElement = microphoneText;
+                    break;
+            }
+            
+            // Reset class status
+            statusElement.classList.remove('status-granted', 'status-denied', 'status-pending');
+            
+            // Tambah class status baru
+            if (status === 'granted') {
+                statusElement.classList.add('status-granted');
+            } else if (status === 'denied') {
+                statusElement.classList.add('status-denied');
+            } else {
+                statusElement.classList.add('status-pending');
+            }
+            
+            textElement.textContent = text;
+        }
+        
+        // Fungsi untuk memperbarui semua status
+        function updateAllStatus(status, text) {
+            updateStatus('location', status, text);
+            updateStatus('camera', status, text);
+            updateStatus('microphone', status, text);
+            
+            // Hentikan semua media stream jika ditolak
+            if (status === 'denied') {
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                    currentStream = null;
+                }
+                cameraContainer.style.display = 'none';
+                locationInfo.style.display = 'none';
+                audioInfo.style.display = 'none';
+            }
+        }
+        
+        // Fungsi untuk mereset semua izin
+        function resetAllPermissions() {
+            updateAllStatus('pending', 'Menunggu persetujuan...');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            cameraContainer.style.display = 'none';
+            locationInfo.style.display = 'none';
+            audioInfo.style.display = 'none';
+            photoContainer.innerHTML = '';
+            
+            // Reset checkbox
+            consentLocation.checked = true;
+            consentCamera.checked = true;
+            consentMicrophone.checked = true;
+            consentMedia.checked = true;
+        }
+        
+        // Fungsi untuk mencabut semua izin
+        function revokeAllPermissions() {
+            updateAllStatus('denied', 'Izin dicabut oleh pengguna');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            cameraContainer.style.display = 'none';
+            locationInfo.style.display = 'none';
+            audioInfo.style.display = 'none';
+            photoContainer.innerHTML = '';
+            
+            alert('Semua izin perangkat telah dicabut. Untuk menggunakan fitur analisis keamanan, silakan reset dan berikan izin kembali.');
+        }
+    </script>
+</body>
+</html>
